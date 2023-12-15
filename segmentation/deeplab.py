@@ -9,6 +9,7 @@ import time
 import numpy as np
 import os
 import argparse
+from focalloss import FocalLoss
 
 parser = argparse.ArgumentParser(description="Your script description here")
 parser.add_argument("--batch_size", type=int, default=64, help="Batch size")
@@ -59,7 +60,7 @@ configs = [
         activation='softmax',
         encoder_name=encoder,
         encoder_weights=None,
-    ), smp.utils.losses.BCELoss(), 5e-4),
+    ), FocalLoss(gamma=2), 5e-4),
 ]
 
 for (model, loss, lr) in configs:
