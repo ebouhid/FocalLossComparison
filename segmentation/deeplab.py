@@ -24,6 +24,9 @@ parser.add_argument("--test_regions", nargs='+', type=int, default=[3, 4], help=
 parser.add_argument("--composition", nargs='+', type=int, default=[4, 3, 2], help="Composition as a list of integers")
 parser.add_argument("--composition_name", type=str, default="RGB", help="Name of the composition")
 parser.add_argument("--experiment_name", type=str, default="Default", help="Name of the experiment")
+parser.add_argument("--gpu_id", type=int, default=0, help="Gpu ID to train the model if CUDA is available.")
+parser.add_argument("--device", type=str, default="cpu", help="Device to train the model on.")
+parser.add_argument("--num_workers", type=int, default=4, help="Number of workers to use on dataloader.")
 args = parser.parse_args()
 
 BATCH_SIZE = args.batch_size
@@ -34,6 +37,8 @@ encoder = args.encoder
 INFO = args.experiment_name
 NUM_CLASSES = args.num_classes
 COMPOSITION = args.composition
+DEVICE = f'cuda:{args.gpu_id}' if args.device == "cuda" else args.device
+NUM_WORKERS = args.num_workers
 composition_name = args.composition_name
 
 train_regions = args.train_regions
@@ -100,14 +105,14 @@ for (model, loss, lr) in configs:
             loss=loss,
             metrics=metrics,
             optimizer=optimizer,
-            device='cuda',
+            device=DEVICE,
             verbose=True,
         )
         test_epoch = smp.utils.train.ValidEpoch(
             model,
             loss=loss,
             metrics=metrics,
-            device='cuda',
+            device=DEVICE,
             verbose=True,
         )
 
@@ -117,14 +122,14 @@ for (model, loss, lr) in configs:
             batch_size=BATCH_SIZE,
             drop_last=False,
             shuffle=True,
-            num_workers=-1)
+            num_workers=NUM_WORKERS)
 
         test_dataloader = torch.utils.data.DataLoader(
             dataset=test_ds,
             batch_size=BATCH_SIZE,
             drop_last=False,
             shuffle=False,
-            num_workers=-1)
+            num_workers=NUM_WORKERS)
         
         # batch = next(iter(train_dataloader))
         # print(batch[0].shape)
